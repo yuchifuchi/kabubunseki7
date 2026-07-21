@@ -27,6 +27,7 @@ jobs:
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
         run: npm run morning
       - name: 成果物をアップロード(スマホからダウンロード可)
         uses: actions/upload-artifact@v4
