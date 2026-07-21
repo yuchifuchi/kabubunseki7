@@ -1,0 +1,38 @@
+name: morning-video
+
+on:
+  schedule:
+    - cron: '30 21 * * 0-4' # JST 平日6:30(UTC 日〜木 21:30)
+  workflow_dispatch: {} # スマホのGitHubアプリ/ブラウザから手動実行も可能
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 日本語フォントとTTSを準備
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-noto-cjk
+          pip install edge-tts
+      - name: 依存インストール
+        working-directory: market-video
+        run: npm ci
+      - name: 動画生成(取得→集計→音声→レンダリング)
+        working-directory: market-video
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: npm run morning
+      - name: 成果物をアップロード(スマホからダウンロード可)
+        uses: actions/upload-artifact@v4
+        with:
+          name: short-video
+          path: |
+            market-video/out/*.mp4
+            market-video/out/*.png
+          retention-days: 7
